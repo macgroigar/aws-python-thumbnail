@@ -5,6 +5,20 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: python3.8
+  region: eu-west-2
+  profile: Stephen
+  stage: dev
+  timeout: 10
+  memorySize: 128
+  enviroment:
+    THUMBNAIL_SIZE: 128
+    REGION_NAME: ${self:provider.region}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Resource: '*'
+          Action: 's3:*'
 
 functions:
   hello:
