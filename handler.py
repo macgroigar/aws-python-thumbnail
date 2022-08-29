@@ -10,6 +10,9 @@ import json
 
 s3 = boto3.client('s3')
 size = int(os.environ['THUMBNAIL_SIZE'])
+dbtable = str(os.environ['DYNAMODB_TABLE'])
+dynamodb = boto3.resource(
+    'dynamodb', region_name=str(os.environ['REGION_NAME']))
 
 def s3_thumbnail_generator(event, context):
     # parse event
@@ -66,12 +69,25 @@ def upload_to_s3(bucket, key, image, img_size):
     print(response)
 
     url = '{}/{}/{}'.format(s3.meta.endpoint_url, bucket, key)
-
+    s3_save_thumbnail_url_to_dynamo(url_path=url, img_size=img_size)
     return url
 
-    body = {
-        "message": "Go Serverless v3.0! Your function executed successfully!",
-        "input": event,
-    }
+def s3_save_thumbnail_url_to_dynamo(url_path, img_size):
+    toint = float(img_size*0.53)/1000
+    table = dynamodb.Table(dbtable)
+    response = table.put_item(
+        Item={
+            'id': str(uuid.uuid4()),
+            'url': str(url_path),
+            'approxReducedSize': str(toint) + str(' KB'),
+            'createdAt': str(datetime.now()),
+            'updatedAt': str(datetime.now())
+        }
+    )
 
-    return {"statusCode": 200, "body": json.dumps(body)}
+# get all image urls from the bucked and show in a json format
+    return {
+        'statusCode': 200,
+        'headers': {'Content-Type': 'application/json'},
+        'body': json.dumps(response)
+    }
