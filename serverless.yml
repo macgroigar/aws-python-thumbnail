@@ -10,7 +10,7 @@ provider:
   stage: dev
   timeout: 10
   memorySize: 128
-  enviroment:
+  environment:
     THUMBNAIL_SIZE: 128
     REGION_NAME: ${self:provider.region}
   iam:
@@ -29,10 +29,10 @@ functions:
     handler: handler.s3_thumbnail_generator
     events:
       - s3:
-        bucket: ${self:custom.bucket}
-        event: s3:ObjectCreated:*
-        rules:
-          - suffix: .png
+          bucket: ${self:custom.bucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .png
 
 plugins:
   - serverless-python-requirements
